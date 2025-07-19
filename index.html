@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,12 +18,29 @@
 
 <body>
     <div id="messageArea"></div>
-    <div id="pageContent">
-            <div class="empty-state">
-                Metin dosyası yükleniyor...
-            </div>
+
+    <div id="pageContent" class="page-content fade-in">
+        <h2></h2>
+        <pre id="contentText"></pre>
+    </div>
+    
+    <div class="reader-controls">
+        <div class="page-info">
+            <span id="currentPageInfo">Page 1 of 1</span>
+        </div>
+        <div class="nav-buttons">
+            <button id="prevBtn" class="nav-btn" disabled="">⬅️ Previous</button>
+            <button id="nextBtn" class="nav-btn">Next ➡️</button>
+        </div>
+        <div class="page-jump">
+            <select id="pageSelect">
+                <option value="">Jump to page...</option>
+                <option value="0">Page 1</option>
+            </select>
+        </div>
     </div>
 
     <script src="/esitokuyucu.js"></script>
 </body>
+
 </html>

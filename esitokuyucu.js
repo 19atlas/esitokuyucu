@@ -1,77 +1,131 @@
 let pages = [];
 let currentPage = 0;
-const contentArea = document.getElementById('pageContent');
-const messageArea = document.getElementById('messageArea');
 
-window.onload = function () {
-    loadTextFile();
-};
+const currentPageInfo = document.getElementById('currentPageInfo');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const pageSelect = document.getElementById('pageSelect');
+const pageContent = document.getElementById('pageContent');
+const contentText = document.getElementById('contentText');
 
-async function loadTextFile() {
+
+async function loadTextFromFile() { // dosyadan yükle
     try {
-        contentArea.innerHTML = '<div>Dosya yükleniyor...</div>';
-
-        // Fetch ile metin.txt dosyasını al
+        const contentArea = document.getElementById('contentText');
+        if (contentArea) {
+            contentArea.innerHTML = '<div>Dosya yükleniyor...</div>';
+        }
+        
+        // Fetch ile metin.md
         const response = await fetch('metin.md?' + new Date().getTime());
-
         if (!response.ok) {
             throw new Error(`Dosya bulunamadı: ${response.status} - ${response.statusText}`);
         }
-
+        
         const text = await response.text();
         const headers = response.headers;
-
-
-        // İçeriği göster
-        displayTextContent(text);
-
-
+        
+        initializePagesFromText(text);
+        
     } catch (error) {
-        showMessage(`Hata: ${error.message}`, 'error');
-        contentArea.innerHTML = `
-                    <div class="empty-state">
-                        <strong>Dosya yüklenemedi!</strong><br>
-                        Lütfen "metin.txt" dosyasının website ile aynı klasörde olduğundan emin olun.
-                    </div>
-                `;
+        console.error('Dosya yükleme hatası:', error);
+        const sampleText = `Dosya yüklenemedi metin.md dosyası bulunamadı veya okunamadı.
+Hata: ${error.message}`;
+        initializePagesFromText(sampleText);
     }
 }
 
-
-function showMessage(message, type) {
-    const className = type === 'error' ? 'error-message' : 'success-message';
-    messageArea.innerHTML = `<div class="${className}">${message}</div>`;
-
-    // 3 saniye sonra mesajı kaldır
-    setTimeout(() => {
-        messageArea.innerHTML = '';
-    }, 3000);
-}
-
-function displayTextContent(text) {  //asıl okuyucu
-    if (!text.trim()) {
-        contentArea.innerHTML = '<div class="empty-state">Dosya boş görünüyor.</div>';
-        return;
-    }
+function initializePagesFromText(text) {
     pages = text.split('=').map(page => page.trim()).filter(page => page.length > 0);
+    
+    if (pageSelect) {
+        pageSelect.innerHTML = '<option value="">Sayfaya git...</option>';
+        for (let i = 0; i < pages.length; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `Sayfa ${i + 1}`;
+            pageSelect.appendChild(option);
+        }
+    }
+    
+    currentPage = 0;
+    displayPage();
+}
 
-    // Metni paragraflara böl
-    const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim());
+function displayPage() {
+    if (pages.length === 0) return;
 
-    if (paragraphs.length === 0) {
-        // Eğer çift satır arası yoksa, tek satırları paragraf olarak işle
-        const lines = text.split('\n').filter(line => line.trim());
-        paragraphs.push(...lines);
+    if (currentPageInfo) {
+        currentPageInfo.textContent = `Sayfa ${currentPage + 1} / ${pages.length}`;
     }
 
-    // Her paragrafı <p> etiketine ekle
-    let htmlContent = '';
-    paragraphs.forEach(paragraph => {
-        const cleanParagraph = paragraph.trim().replace(/\n/g, '<br>');
-        if (cleanParagraph) {
-            htmlContent += `<p>${cleanParagraph}</p>`;
+    if (prevBtn) {
+        prevBtn.disabled = currentPage === 0;
+    }
+    if (nextBtn) {
+        nextBtn.disabled = currentPage === pages.length - 1;
+    }
+
+    // Sayfa içeriğini göster
+    const pageText = pages[currentPage];
+    if (contentText) {
+        contentText.textContent = pageText;
+    }
+
+    // Fade-in animasyonu ekle
+    if (pageContent) {
+        pageContent.classList.remove('fade-in');
+        setTimeout(() => {
+            pageContent.classList.add('fade-in');
+        }, 50);
+    }
+
+    // Page selector'ı güncelle
+    if (pageSelect) {
+        pageSelect.value = currentPage;
+    }
+}
+
+// Önceki sayfa
+function previousPage() {
+    if (currentPage > 0) {
+        currentPage--;
+        displayPage();
+    }
+}
+
+// Sonraki sayfa
+function nextPage() {
+    if (currentPage < pages.length - 1) {
+        currentPage++;
+        displayPage();
+    }
+}
+
+// Belirli bir sayfaya atla
+function jumpToPage() {
+    const selectedPage = parseInt(pageSelect.value);
+    if (!isNaN(selectedPage) && selectedPage >= 0 && selectedPage < pages.length) {
+        currentPage = selectedPage;
+        displayPage();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (prevBtn) prevBtn.addEventListener('click', previousPage);
+    if (nextBtn) nextBtn.addEventListener('click', nextPage);
+    if (pageSelect) pageSelect.addEventListener('change', jumpToPage);
+    
+    // Klavye navigasyonu
+    document.addEventListener('keydown', function(e) {
+        if (pages.length === 0) return;
+        
+        if (e.key === 'ArrowLeft' && currentPage > 0) {
+            previousPage();
+        } else if (e.key === 'ArrowRight' && currentPage < pages.length - 1) {
+            nextPage();
         }
     });
-
-    contentArea.innerHTML = htmlContent;
-}
+    
+    loadTextFromFile();
+});

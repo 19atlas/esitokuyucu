@@ -13,6 +13,14 @@
             font-style: italic;
             padding: 40px;
         }
+
+        pre {
+            display: block;
+            font-family: monospace;
+            white-space: pre;
+            white-space: pre-wrap;
+            margin: 1em 0;
+        }
     </style>
 </head>
 
@@ -20,17 +28,16 @@
     <div id="messageArea"></div>
 
     <div id="pageContent" class="page-content fade-in">
-        <h2></h2>
         <pre id="contentText"></pre>
     </div>
-    
+
     <div class="reader-controls">
         <div class="page-info">
             <span id="currentPageInfo">Page 1 of 1</span>
         </div>
         <div class="nav-buttons">
-            <button id="prevBtn" class="nav-btn" disabled="">⬅️ Previous</button>
-            <button id="nextBtn" class="nav-btn">Next ➡️</button>
+            <button id="prevBtn" class="nav-btn" disabled="">⬅️</button>
+            <button id="nextBtn" class="nav-btn">➡️</button>
         </div>
         <div class="page-jump">
             <select id="pageSelect">
